@@ -11,5 +11,5 @@ bucket_name = "openai-cf-images"
 preview_bucket_name = "ai-images"
 
 [vars]
-CLOUDFLARE_ACCOUNT_ID = "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+ACCESS_TOKEN = "$AI_API_ACCESS_TOKEN"
 # MODEL_MAPPER = { "gpt-3.5-turbo" = "@cf/meta/llama-2-7b-chat-int8" } # Optional
