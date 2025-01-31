@@ -1,6 +1,6 @@
 import { Router, createCors, error, json } from 'itty-router';
 
-// import the routes
+// Import the routes
 import { chatHandler } from './routes/chat';
 import { completionHandler } from './routes/completion';
 import { embeddingsHandler } from './routes/embeddings';
@@ -22,6 +22,7 @@ function extractToken(authorizationHeader) {
 	}
 	return null;
 }
+
 // MIDDLEWARE: withAuthenticatedUser - embeds user in Request or returns a 401
 const bearerAuthentication = (request, env) => {
 	const authorizationHeader = request.headers.get('Authorization');
@@ -38,7 +39,7 @@ const bearerAuthentication = (request, env) => {
 router.all('*', preflight);
 
 router
-	.all('*', bearerAuthentication)
+	.all('*', (request, env) => bearerAuthentication(request, env))
 	.post('/chat/completions', chatHandler)
 	.post('/completions', completionHandler)
 	.post('/embeddings', embeddingsHandler)
@@ -52,17 +53,14 @@ router
 router.all('*', () => new Response('404, not found!', { status: 404 }));
 
 export default {
-	fetch: (request, env, ctx) =>
-		router
-			.handle(request, env, ctx)
-
-			// catch any errors
-			.catch(e => {
-				console.error(e);
-				return error(e);
-			})
-
-			// add CORS headers to all requests,
-			// including errors
-			.then(corsify),
+	fetch: async (request, env, ctx) => {
+		try {
+			return await router.handle(request, env, ctx);
+		} catch (e) {
+			console.error(e);
+			return error(e);
+		} finally {
+			return corsify;
+		}
+	},
 };
